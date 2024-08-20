@@ -2,23 +2,31 @@ package config
 
 import (
 	"flag"
+	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
 	"time"
-
-	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	Env         string        `yaml:"env" envDefault:"local"`
-	StoragePath string        `yaml:"storage_path" env-required:"true"`
-	TokenTTL    time.Duration `yaml:"token_ttl" env-required:"true"`
-	HTTPServer  `yaml:"http_server"`
+	Env        string `yaml:"env" envDefault:"local"`
+	JWT        `yaml:"jwt"`
+	Storage    `yaml:"storage"`
+	HTTPServer `yaml:"http_server"`
+}
+
+type JWT struct {
+	Secret   string        `yaml:"secret" envDefault:"secret"`
+	TokenTTL time.Duration `yaml:"token_ttl" envDefault:"1h"`
+}
+
+type Storage struct {
+	StoragePath string `yaml:"storage_path" env-required:"true"`
+	SpaceName   string `yaml:"space_name" env-required:"true"`
 }
 
 type HTTPServer struct {
-	Address string        `yaml:"address" envDefault:"localhost:8080"`
-	Timeout time.Duration `yaml:"timeout" envDefault:"4s"`
+	Address string `yaml:"address" envDefault:":8080"`
 }
 
 func MustLoad() *Config {

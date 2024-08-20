@@ -1,0 +1,9 @@
+env: "local"
+jwt:
+  secret: "1234"
+  token_ttl: 1h
+storage:
+  storage_path: "tarantool:3301"
+  space_name: "data_storage"
+http_server:
+  address: ":8080"
