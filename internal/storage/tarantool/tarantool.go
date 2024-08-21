@@ -48,19 +48,24 @@ func (s *Storage) Data(keys []string) (map[string]any, error) {
 
 	result := make(map[string]any)
 
+	var futures []*tarantool.Future
 	for _, key := range keys {
-		resp, err := s.connection.Do(
-			tarantool.NewSelectRequest(s.spaceName).
-				Limit(1).
-				Iterator(tarantool.IterEq).
-				Key([]any{key}),
-		).Get()
+		request := tarantool.NewSelectRequest(s.spaceName).
+			Limit(1).
+			Iterator(tarantool.IterEq).
+			Key([]any{key})
+		futures = append(futures, s.connection.Do(request))
+	}
+
+	for _, future := range futures {
+		resp, err := future.Get()
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
 
 		if len(resp) > 0 {
-			result[key] = resp[0].([]any)[1]
+			pair := resp[0].([]any)
+			result[pair[0].(string)] = pair[1]
 		}
 	}
 
